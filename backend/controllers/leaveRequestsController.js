@@ -32,6 +32,21 @@ function calculateWorkingDays(startDate, endDate) {
   return count;
 }
 
+function getWeekRange(date) {
+  const current = normalizeDate(date);
+  const day = current.getUTCDay();
+  const diffToMonday = (day + 6) % 7;
+
+  const startOfWeek = new Date(current);
+  startOfWeek.setUTCDate(current.getUTCDate() - diffToMonday);
+
+  const endOfNextWeek = new Date(startOfWeek);
+  endOfNextWeek.setUTCDate(startOfWeek.getUTCDate() + 13);
+  endOfNextWeek.setUTCHours(23, 59, 59, 999);
+
+  return { startOfWeek, endOfNextWeek };
+}
+
 async function ensureSufficientBalance(userId, leaveTypeId, requestedDays) {
   const leaveType = await LeaveType.findById(leaveTypeId).lean();
   if (!leaveType) {
@@ -185,8 +200,44 @@ function rejectLeaveRequest(req, res) {
   return updateLeaveRequestStatus(req, res, "Rejected", "REJECTED");
 }
 
+async function getTeamLeaveCalendar(req, res) {
+  try {
+    const { leaveType } = req.query;
+    const { startOfWeek, endOfNextWeek } = getWeekRange(new Date());
+
+    const match = {
+      status: "Approved",
+      startDate: { $lte: endOfNextWeek },
+      endDate: { $gte: startOfWeek },
+    };
+
+    if (leaveType) {
+      match.leaveType = leaveType;
+    }
+
+    const leaveRequests = await LeaveRequest.find(match)
+      .populate("userId", "name")
+      .populate("leaveType", "name")
+      .sort({ startDate: 1 })
+      .lean();
+
+    const response = leaveRequests.map((request) => ({
+      id: request._id,
+      userName: request.userId ? request.userId.name : null,
+      leaveType: request.leaveType ? request.leaveType.name : null,
+      startDate: request.startDate,
+      endDate: request.endDate,
+    }));
+
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+}
+
 module.exports = {
   createLeaveRequest,
   approveLeaveRequest,
   rejectLeaveRequest,
+  getTeamLeaveCalendar,
 };
