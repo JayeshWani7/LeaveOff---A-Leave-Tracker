@@ -118,6 +118,11 @@ project-root/
 
 ---
 
+## Clone 
+```bash 
+git clone https://github.com/JayeshWani7/LeaveOff---A-Leave-Tracker/
+```
+
 ## 🔙 Backend Setup
 
 ```bash
