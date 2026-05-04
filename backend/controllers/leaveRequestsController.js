@@ -91,7 +91,10 @@ async function createLeaveRequest(req, res) {
       userId,
     } = req.body || {};
 
-    const requesterId = userId || (req.user && req.user.id);
+    const requesterId = (req.user && req.user.id) || userId;
+    if (userId && req.user && req.user.role !== "superadmin" && userId !== req.user.id) {
+      return res.status(403).json({ message: "Cannot create leave request for another user." });
+    }
 
     if (!requesterId || !leaveType || !startDate || !endDate || !reason || !appliedTo) {
       return res.status(400).json({
@@ -148,7 +151,7 @@ async function resolveManager(req) {
   }
 
   const manager = await User.findById(managerId).lean();
-  if (!manager || manager.role !== "manager") {
+  if (!manager || (manager.role !== "manager" && manager.role !== "superadmin")) {
     return null;
   }
 

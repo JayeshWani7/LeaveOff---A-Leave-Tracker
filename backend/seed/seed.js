@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 require("dotenv").config();
 
@@ -71,6 +72,10 @@ function pickRandom(list) {
 
 function buildEmail(name, index) {
   return `${name.toLowerCase().replace(/\s+/g, ".")}${index}@leaveoff.dev`;
+}
+
+function buildUsername(name, index) {
+  return `${name.toLowerCase().replace(/\s+/g, "")}${index}`;
 }
 
 function normalizeDate(input) {
@@ -195,12 +200,15 @@ function buildAttendanceRecords(users, approvedRequests) {
 async function seedUsers() {
   const managers = [];
   const employees = [];
+  const passwordHash = await bcrypt.hash("LeaveOff@123", 10);
 
   for (let i = 0; i < 3; i += 1) {
     const name = `${pickRandom(FIRST_NAMES)} ${pickRandom(LAST_NAMES)}`;
     managers.push({
       name,
       email: buildEmail(name, i + 1),
+      username: buildUsername(name, i + 1),
+      passwordHash,
       role: "manager",
     });
   }
@@ -213,6 +221,8 @@ async function seedUsers() {
     employees.push({
       name,
       email: buildEmail(name, i + 10),
+      username: buildUsername(name, i + 10),
+      passwordHash,
       role: "employee",
       managerId: manager._id,
     });
@@ -220,7 +230,16 @@ async function seedUsers() {
 
   const employeeDocs = await User.insertMany(employees);
 
-  return { managers: managerDocs, employees: employeeDocs };
+  const superadminName = "Super Admin";
+  const superadmin = await User.create({
+    name: superadminName,
+    email: "superadmin@leaveoff.dev",
+    username: "superadmin",
+    passwordHash,
+    role: "superadmin",
+  });
+
+  return { managers: managerDocs, employees: employeeDocs, superadmin };
 }
 
 async function seedLeaveTypes() {
@@ -348,7 +367,7 @@ seed()
     const managerCount = result.users.managers.length;
     const employeeCount = result.users.employees.length;
     console.log(
-      `Seeded ${managerCount} managers, ${employeeCount} employees, ${result.requestCount} leave requests, ${result.attendanceCount} attendance records.`
+      `Seeded ${managerCount} managers, ${employeeCount} employees, ${result.requestCount} leave requests, ${result.attendanceCount} attendance records, 1 superadmin.`
     );
     process.exit(0);
   })

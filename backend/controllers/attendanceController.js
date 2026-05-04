@@ -10,9 +10,16 @@ function resolveUserId(req) {
   return (req.user && req.user.id) || req.body.userId || req.query.userId;
 }
 
+function isAdminRole(role) {
+  return role === "manager" || role === "superadmin";
+}
+
 async function handleCheckIn(req, res) {
   try {
     const userId = resolveUserId(req);
+    if (req.user && req.body.userId && !isAdminRole(req.user.role) && req.body.userId !== req.user.id) {
+      return res.status(403).json({ message: "Cannot check in for another user." });
+    }
     if (!userId) {
       return res.status(400).json({ message: "userId is required." });
     }
@@ -27,6 +34,9 @@ async function handleCheckIn(req, res) {
 async function handleCheckOut(req, res) {
   try {
     const userId = resolveUserId(req);
+    if (req.user && req.body.userId && !isAdminRole(req.user.role) && req.body.userId !== req.user.id) {
+      return res.status(403).json({ message: "Cannot check out for another user." });
+    }
     if (!userId) {
       return res.status(400).json({ message: "userId is required." });
     }
@@ -41,6 +51,9 @@ async function handleCheckOut(req, res) {
 async function getTodayAttendance(req, res) {
   try {
     const userId = resolveUserId(req);
+    if (req.user && req.query.userId && !isAdminRole(req.user.role) && req.query.userId !== req.user.id) {
+      return res.status(403).json({ message: "Cannot access another user's attendance." });
+    }
     if (!userId) {
       return res.status(400).json({ message: "userId is required." });
     }
@@ -62,6 +75,9 @@ async function getTodayAttendance(req, res) {
 async function getUserAttendance(req, res) {
   try {
     const userId = req.params.id;
+    if (req.user && req.user.id !== userId && !isAdminRole(req.user.role)) {
+      return res.status(403).json({ message: "Cannot access another user's attendance." });
+    }
     if (!userId) {
       return res.status(400).json({ message: "userId is required." });
     }

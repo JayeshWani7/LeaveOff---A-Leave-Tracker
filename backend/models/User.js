@@ -16,10 +16,21 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    passwordHash: {
+      type: String,
+      required: true,
+    },
     role: {
       type: String,
       required: true,
-      enum: ["employee", "manager"],
+      enum: ["employee", "manager", "superadmin"],
     },
     managerId: {
       type: Schema.Types.ObjectId,
@@ -34,7 +45,7 @@ const userSchema = new Schema(
           }
           return !value;
         },
-        message: "Employees must have managerId; managers must not.",
+        message: "Employees must have managerId; managers/superadmins must not.",
       },
     },
   },

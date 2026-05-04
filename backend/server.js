@@ -4,6 +4,8 @@ require("dotenv").config();
 
 const leaveRequestRoutes = require("./routes/leaveRequests");
 const attendanceRoutes = require("./routes/attendance");
+const authRoutes = require("./routes/auth");
+const { requireAuth } = require("./middleware/auth");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,8 +22,9 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.use("/api", leaveRequestRoutes);
-app.use("/api", attendanceRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api", requireAuth, leaveRequestRoutes);
+app.use("/api", requireAuth, attendanceRoutes);
 
 mongoose
   .connect(MONGODB_URI)
