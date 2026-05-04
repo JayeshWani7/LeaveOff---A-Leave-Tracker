@@ -134,8 +134,9 @@ npm install
 
 ```
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
+MONGODB_URI="mongodb+srv://wanijayesh0_db_user:xtKz6g1m3eXBDjVv@cluster0.ozeitq7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true"
+JWT_SECRET=your-strong-secret
+
 ```
 
 ### Run Backend
@@ -173,6 +174,17 @@ This will generate:
 ```bash
 cd frontend
 npm install
+```
+
+### Create `.env` file
+
+```
+REACT_APP_API_BASE=http://localhost:5000
+
+```
+### Run Frontend
+
+```bash
 npm start
 ```
 
