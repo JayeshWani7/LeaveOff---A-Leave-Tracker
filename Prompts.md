@@ -4,3 +4,7 @@
 - Fix seed-time errors (duplicate index warning, pre-validate hook next error) and ensure dependencies are set.
 - Update the Leave & Time-Off Tracker backend schema to include Attendance tracking with Mongoose, business logic utilities, and seed data for the last 30 days.
 - Create Express APIs for approving and rejecting leave requests with manager-only enforcement, status updates, and audit logging.
+- Create an API to fetch team leave calendar for current and next week with filtering and sorting.
+- Create Express APIs for the attendance system (check-in, check-out, today, user history).
+- Create a backend server.js with Express and route wiring if missing.
+- Add RBAC with authentication: username/password login for employee, manager, and superadmin.
