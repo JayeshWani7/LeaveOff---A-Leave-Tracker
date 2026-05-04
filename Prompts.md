@@ -15,3 +15,4 @@
 - Troubleshoot proxy connection errors when backend is down.
 - Add API base URL configuration to fix frontend requests hitting localhost:3000.
 - Fix approval flow crash when request body is missing by guarding managerComment access.
+- Add frontend UX improvements: spinners, friendly errors, empty states, and status badges.

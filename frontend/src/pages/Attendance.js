@@ -1,8 +1,15 @@
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { EmptyState } from "../components/ui/empty-state";
 
 function Attendance() {
+  const recentAttendance = [
+    { date: "May 3", status: "Present" },
+    { date: "May 2", status: "Half-Day" },
+    { date: "May 1", status: "On-Leave" },
+  ];
+
   return (
     <div className="space-y-6">
       <Card>
@@ -26,11 +33,13 @@ function Attendance() {
           <CardTitle>Recent attendance</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {[
-            { date: "May 3", status: "Present" },
-            { date: "May 2", status: "Half-Day" },
-            { date: "May 1", status: "On-Leave" },
-          ].map((record) => (
+          {recentAttendance.length === 0 ? (
+            <EmptyState
+              title="No attendance records yet"
+              description="Check in to create your first attendance entry."
+            />
+          ) : null}
+          {recentAttendance.map((record) => (
             <div
               key={record.date}
               className="flex items-center justify-between rounded-2xl border border-ink/10 bg-white/70 p-4"

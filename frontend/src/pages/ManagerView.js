@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { EmptyState } from "../components/ui/empty-state";
+import { Spinner } from "../components/ui/spinner";
+import { StatusBadge } from "../components/ui/status-badge";
 import { useApi } from "../lib/api";
 
 function ManagerView() {
@@ -10,6 +12,7 @@ function ManagerView() {
   const [requests, setRequests] = useState([]);
   const [status, setStatus] = useState({ loading: true, error: "" });
   const [remarks, setRemarks] = useState({});
+  const [actionId, setActionId] = useState(null);
 
   const loadRequests = async () => {
     setStatus({ loading: true, error: "" });
@@ -18,20 +21,26 @@ function ManagerView() {
       setRequests(data);
       setStatus({ loading: false, error: "" });
     } catch (error) {
-      setStatus({ loading: false, error: error.message });
+      setStatus({
+        loading: false,
+        error: "We couldn't load pending requests. Please refresh and try again.",
+      });
     }
   };
 
   useEffect(() => {
     loadRequests();
-  }, []);
+  }, [api]);
 
   const handleAction = async (id, action) => {
     try {
+      setActionId(id);
+      setStatus({ loading: true, error: "" });
       if (action === "reject") {
         const comment = (remarks[id] || "").trim();
         if (!comment) {
           setStatus({ loading: false, error: "Please add a remark before rejecting." });
+          setActionId(null);
           return;
         }
         await api(`/api/leave-requests/${id}/${action}`, {
@@ -43,7 +52,12 @@ function ManagerView() {
       }
       await loadRequests();
     } catch (error) {
-      setStatus({ loading: false, error: error.message });
+      setStatus({
+        loading: false,
+        error: "We couldn't update that request. Please try again.",
+      });
+    } finally {
+      setActionId(null);
     }
   };
 
@@ -60,9 +74,12 @@ function ManagerView() {
         </CardHeader>
         <CardContent className="space-y-4">
           {status.error ? <p className="text-sm text-red-600">{status.error}</p> : null}
-          {status.loading ? <p className="text-sm text-ink/60">Loading...</p> : null}
+          {status.loading ? <Spinner label="Loading requests" /> : null}
           {!status.loading && requests.length === 0 ? (
-            <p className="text-sm text-ink/60">No pending requests.</p>
+            <EmptyState
+              title="No pending requests"
+              description="You're all caught up. New submissions will appear here."
+            />
           ) : null}
           {requests.map((request) => (
             <div
@@ -87,16 +104,29 @@ function ManagerView() {
                 />
               </div>
               <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
-                <Badge>Pending</Badge>
-                <Button size="sm" onClick={() => handleAction(request._id, "approve")}>
-                  Approve
+                <StatusBadge status={request.status || "Pending"} />
+                <Button
+                  size="sm"
+                  disabled={status.loading && actionId === request._id}
+                  onClick={() => handleAction(request._id, "approve")}
+                >
+                  {status.loading && actionId === request._id ? (
+                    <Spinner className="text-white" />
+                  ) : (
+                    "Approve"
+                  )}
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
+                  disabled={status.loading && actionId === request._id}
                   onClick={() => handleAction(request._id, "reject")}
                 >
-                  Reject
+                  {status.loading && actionId === request._id ? (
+                    <Spinner />
+                  ) : (
+                    "Reject"
+                  )}
                 </Button>
               </div>
             </div>

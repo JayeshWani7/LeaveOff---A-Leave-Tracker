@@ -1,5 +1,6 @@
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { EmptyState } from "../components/ui/empty-state";
 
 const entries = [
   { name: "Avery Das", type: "WFH", range: "May 6 - May 7" },
@@ -15,6 +16,12 @@ function Calendar() {
           <CardTitle>Team leave calendar</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {entries.length === 0 ? (
+            <EmptyState
+              title="No upcoming leave entries"
+              description="Once requests are approved, they will appear here."
+            />
+          ) : null}
           {entries.map((entry) => (
             <div
               key={entry.name}
