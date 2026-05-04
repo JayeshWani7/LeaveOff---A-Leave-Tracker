@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 require("dotenv").config();
 
-const { User, LeaveType, LeaveRequest, AuditLog } = require("../models");
+const { User, LeaveType, LeaveRequest, AuditLog, Attendance } = require("../models");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -79,6 +79,13 @@ function normalizeDate(input) {
   return date;
 }
 
+function getDayBounds(input) {
+  const start = normalizeDate(input);
+  const end = new Date(start);
+  end.setUTCHours(23, 59, 59, 999);
+  return { start, end };
+}
+
 function calculateWorkingDays(startDate, endDate) {
   if (!startDate || !endDate) {
     return 0;
@@ -112,6 +119,77 @@ function randomDateRange(year) {
   const endDate = new Date(Date.UTC(year, month, startDay + length));
 
   return { startDate, endDate };
+}
+
+function buildAttendanceRecords(users, approvedRequests) {
+  const records = [];
+  const approvedByUser = new Map();
+
+  for (const request of approvedRequests) {
+    const key = request.userId.toString();
+    if (!approvedByUser.has(key)) {
+      approvedByUser.set(key, []);
+    }
+    approvedByUser.get(key).push({
+      startDate: request.startDate,
+      endDate: request.endDate,
+    });
+  }
+
+  const today = normalizeDate(new Date());
+  const startDate = new Date(today);
+  startDate.setUTCDate(startDate.getUTCDate() - 29);
+
+  const allUsers = [...users.managers, ...users.employees];
+
+  for (const user of allUsers) {
+    const ranges = approvedByUser.get(user._id.toString()) || [];
+
+    for (let i = 0; i < 30; i += 1) {
+      const date = new Date(startDate);
+      date.setUTCDate(startDate.getUTCDate() + i);
+
+      const { start, end } = getDayBounds(date);
+      const onLeave = ranges.some(
+        (range) => range.startDate <= end && range.endDate >= start
+      );
+
+      if (onLeave) {
+        records.push({
+          userId: user._id,
+          date,
+          status: "On-Leave",
+          notes: "Approved leave",
+        });
+        continue;
+      }
+
+      const roll = Math.random();
+
+      if (roll < 0.2) {
+        continue;
+      }
+
+      const isHalfDay = roll < 0.4;
+      const checkInTime = new Date(date);
+      const checkInHour = 8 + Math.floor(Math.random() * 3);
+      const checkInMinute = Math.floor(Math.random() * 60);
+      checkInTime.setUTCHours(checkInHour, checkInMinute, 0, 0);
+
+      const checkOutTime = new Date(checkInTime);
+      checkOutTime.setUTCHours(checkInTime.getUTCHours() + (isHalfDay ? 3 : 8));
+
+      records.push({
+        userId: user._id,
+        date,
+        checkInTime,
+        checkOutTime,
+        notes: isHalfDay ? "Half-day" : "Full day",
+      });
+    }
+  }
+
+  return records;
 }
 
 async function seedUsers() {
@@ -250,15 +328,19 @@ async function seed() {
     LeaveType.deleteMany({}),
     LeaveRequest.deleteMany({}),
     AuditLog.deleteMany({}),
+    Attendance.deleteMany({}),
   ]);
 
   const users = await seedUsers();
   const leaveTypes = await seedLeaveTypes();
   const requestCount = await seedLeaveRequests(users, leaveTypes);
+  const approvedRequests = await LeaveRequest.find({ status: "Approved" }).lean();
+  const attendanceRecords = buildAttendanceRecords(users, approvedRequests);
+  const attendanceDocs = await Attendance.insertMany(attendanceRecords);
 
   await mongoose.disconnect();
 
-  return { users, leaveTypes, requestCount };
+  return { users, leaveTypes, requestCount, attendanceCount: attendanceDocs.length };
 }
 
 seed()
@@ -266,7 +348,7 @@ seed()
     const managerCount = result.users.managers.length;
     const employeeCount = result.users.employees.length;
     console.log(
-      `Seeded ${managerCount} managers, ${employeeCount} employees, ${result.requestCount} leave requests.`
+      `Seeded ${managerCount} managers, ${employeeCount} employees, ${result.requestCount} leave requests, ${result.attendanceCount} attendance records.`
     );
     process.exit(0);
   })
