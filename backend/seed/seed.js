@@ -66,11 +66,11 @@ async function seed() {
   await mongoose.connect(MONGODB_URI);
 
   await Promise.all([
-    User.deleteMany({}),
-    LeaveType.deleteMany({}),
-    LeaveRequest.deleteMany({}),
-    AuditLog.deleteMany({}),
-    Attendance.deleteMany({}),
+    // User.deleteMany({}),
+    // LeaveType.deleteMany({}),
+    // LeaveRequest.deleteMany({}),
+    // AuditLog.deleteMany({}),
+    // Attendance.deleteMany({}),
   ]);
 
   const users = await seedUsers();
