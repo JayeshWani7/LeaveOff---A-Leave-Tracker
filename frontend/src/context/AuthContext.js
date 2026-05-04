@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 const AuthContext = createContext(null);
 
 const STORAGE_KEY = "leaveoff_auth";
+const API_BASE = process.env.REACT_APP_API_BASE || "";
 
 function getStoredAuth() {
   try {
@@ -20,7 +21,7 @@ export function AuthProvider({ children }) {
   const [authState, setAuthState] = useState(() => getStoredAuth());
 
   const login = useCallback(async (username, password) => {
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),

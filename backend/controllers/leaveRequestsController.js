@@ -96,10 +96,22 @@ async function createLeaveRequest(req, res) {
       return res.status(403).json({ message: "Cannot create leave request for another user." });
     }
 
-    if (!requesterId || !leaveType || !startDate || !endDate || !reason || !appliedTo) {
+    if (!requesterId || !leaveType || !startDate || !endDate || !reason) {
       return res.status(400).json({
-        message: "leaveType, startDate, endDate, reason, appliedTo, and userId are required.",
+        message: "leaveType, startDate, endDate, reason, and userId are required.",
       });
+    }
+
+    let resolvedApprover = appliedTo;
+    if (!resolvedApprover) {
+      const requester = await User.findById(requesterId).lean();
+      if (requester && requester.role === "employee" && requester.managerId) {
+        resolvedApprover = requester.managerId;
+      }
+    }
+
+    if (!resolvedApprover) {
+      return res.status(400).json({ message: "appliedTo is required for this request." });
     }
 
     const start = normalizeDate(startDate);
@@ -127,7 +139,7 @@ async function createLeaveRequest(req, res) {
       workingDays,
       reason: reason.trim(),
       status: "Pending",
-      appliedTo,
+      appliedTo: resolvedApprover,
     });
 
     await AuditLog.create({
@@ -175,7 +187,8 @@ async function updateLeaveRequestStatus(req, res, status, auditAction) {
     }
 
     leaveRequest.status = status;
-    leaveRequest.managerComment = (req.body.managerComment || "").trim();
+    const managerComment = req.body && req.body.managerComment ? req.body.managerComment : "";
+    leaveRequest.managerComment = managerComment.trim();
     leaveRequest.approvedBy = manager._id;
     leaveRequest.approvedAt = new Date();
 
@@ -201,6 +214,24 @@ function approveLeaveRequest(req, res) {
 
 function rejectLeaveRequest(req, res) {
   return updateLeaveRequestStatus(req, res, "Rejected", "REJECTED");
+}
+
+async function getMyLeaveRequests(req, res) {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized." });
+    }
+
+    const requests = await LeaveRequest.find({ userId: user.id })
+      .populate("leaveType", "name")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json(requests);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
 }
 
 async function getPendingLeaveRequests(req, res) {
@@ -268,4 +299,5 @@ module.exports = {
   rejectLeaveRequest,
   getTeamLeaveCalendar,
   getPendingLeaveRequests,
+  getMyLeaveRequests,
 };

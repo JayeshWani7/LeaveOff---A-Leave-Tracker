@@ -11,3 +11,7 @@
 - Add login page in frontend with role-based UI visibility and seed specific users after clearing data.
 - Fix seed script top-level await error after custom user seeding.
 - Wire frontend to backend, relax login role requirement, and connect Apply Leave/Manager actions to APIs.
+- Add employee leave request list, seed leave types, date constraints, and manager rejection remarks.
+- Troubleshoot proxy connection errors when backend is down.
+- Add API base URL configuration to fix frontend requests hitting localhost:3000.
+- Fix approval flow crash when request body is missing by guarding managerComment access.

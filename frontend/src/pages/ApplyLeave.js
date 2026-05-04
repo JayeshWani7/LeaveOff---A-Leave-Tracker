@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { useApi } from "../lib/api";
+import { Badge } from "../components/ui/badge";
 
 function ApplyLeave() {
   const api = useApi();
@@ -21,21 +22,27 @@ function ApplyLeave() {
     endDate: "",
     reason: "",
   });
+  const [requests, setRequests] = useState([]);
   const [status, setStatus] = useState({ loading: false, error: "", success: "" });
+
+  const today = new Date().toISOString().split("T")[0];
+  const minEndDate = form.startDate || today;
 
   useEffect(() => {
     let active = true;
     const loadData = async () => {
       try {
-        const [types, users] = await Promise.all([
+        const [types, users, myRequests] = await Promise.all([
           api("/api/leave-types"),
           api("/api/users?role=manager"),
+          api("/api/leave-requests/mine"),
         ]);
         if (!active) {
           return;
         }
         setLeaveTypes(types);
         setManagers(users);
+        setRequests(myRequests);
         setForm((prev) => ({
           ...prev,
           leaveType: types[0]?._id || "",
@@ -54,11 +61,25 @@ function ApplyLeave() {
   }, [api]);
 
   const updateField = (key) => (event) => {
-    setForm((prev) => ({ ...prev, [key]: event.target.value }));
+    const value = event.target.value;
+    setForm((prev) => {
+      if (key === "startDate" && prev.endDate && value > prev.endDate) {
+        return { ...prev, startDate: value, endDate: value };
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (form.startDate < today || form.endDate < today) {
+      setStatus({ loading: false, error: "Dates must be today or later.", success: "" });
+      return;
+    }
+    if (form.endDate < form.startDate) {
+      setStatus({ loading: false, error: "End date cannot be before start date.", success: "" });
+      return;
+    }
     setStatus({ loading: true, error: "", success: "" });
     try {
       await api("/api/leave-requests", {
@@ -71,6 +92,8 @@ function ApplyLeave() {
           reason: form.reason,
         }),
       });
+      const myRequests = await api("/api/leave-requests/mine");
+      setRequests(myRequests);
       setStatus({ loading: false, error: "", success: "Request submitted." });
     } catch (error) {
       setStatus({ loading: false, error: error.message, success: "" });
@@ -96,6 +119,9 @@ function ApplyLeave() {
                 onChange={updateField("leaveType")}
                 required
               >
+                {leaveTypes.length === 0 ? (
+                  <option value="">No leave types available</option>
+                ) : null}
                 {leaveTypes.map((type) => (
                   <option key={type._id} value={type._id}>
                     {type.name}
@@ -124,6 +150,7 @@ function ApplyLeave() {
                 type="date"
                 value={form.startDate}
                 onChange={updateField("startDate")}
+                min={today}
                 className="h-11 rounded-2xl border border-ink/10 bg-white/80 px-4 text-sm"
                 required
               />
@@ -134,6 +161,7 @@ function ApplyLeave() {
                 type="date"
                 value={form.endDate}
                 onChange={updateField("endDate")}
+                min={minEndDate}
                 className="h-11 rounded-2xl border border-ink/10 bg-white/80 px-4 text-sm"
                 required
               />
@@ -155,15 +183,54 @@ function ApplyLeave() {
             {status.success ? (
               <p className="md:col-span-2 text-sm text-emerald-700">{status.success}</p>
             ) : null}
-            <div className="md:col-span-2 flex flex-wrap gap-3">
-              <Button type="submit" disabled={status.loading}>
+            <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Button type="submit" disabled={status.loading} className="w-full sm:w-auto">
                 {status.loading ? "Submitting..." : "Submit request"}
               </Button>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" className="w-full sm:w-auto">
                 Save as draft
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Your leave requests</CardTitle>
+          <CardDescription>Track pending, approved, and rejected requests.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {requests.length === 0 ? (
+            <p className="text-sm text-ink/60">No leave requests yet.</p>
+          ) : null}
+          {requests.map((request) => (
+            <div
+              key={request._id}
+              className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink/10 bg-white/70 p-4"
+            >
+              <div>
+                <p className="text-sm font-semibold">
+                  {request.leaveType ? request.leaveType.name : "Leave"}
+                </p>
+                <p className="text-xs text-ink/60">
+                  {new Date(request.startDate).toLocaleDateString()} -{" "}
+                  {new Date(request.endDate).toLocaleDateString()}
+                </p>
+              </div>
+              <Badge
+                variant={
+                  request.status === "Approved"
+                    ? "default"
+                    : request.status === "Rejected"
+                    ? "slate"
+                    : "amber"
+                }
+              >
+                {request.status}
+              </Badge>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>

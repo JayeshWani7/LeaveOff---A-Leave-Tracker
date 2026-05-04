@@ -9,6 +9,7 @@ function ManagerView() {
   const api = useApi();
   const [requests, setRequests] = useState([]);
   const [status, setStatus] = useState({ loading: true, error: "" });
+  const [remarks, setRemarks] = useState({});
 
   const loadRequests = async () => {
     setStatus({ loading: true, error: "" });
@@ -27,11 +28,28 @@ function ManagerView() {
 
   const handleAction = async (id, action) => {
     try {
-      await api(`/api/leave-requests/${id}/${action}`, { method: "PATCH" });
+      if (action === "reject") {
+        const comment = (remarks[id] || "").trim();
+        if (!comment) {
+          setStatus({ loading: false, error: "Please add a remark before rejecting." });
+          return;
+        }
+        await api(`/api/leave-requests/${id}/${action}`, {
+          method: "PATCH",
+          body: JSON.stringify({ managerComment: comment }),
+        });
+      } else {
+        await api(`/api/leave-requests/${id}/${action}`, { method: "PATCH" });
+      }
       await loadRequests();
     } catch (error) {
       setStatus({ loading: false, error: error.message });
     }
+  };
+
+  const handleRemarkChange = (id) => (event) => {
+    const value = event.target.value;
+    setRemarks((prev) => ({ ...prev, [id]: value }));
   };
 
   return (
@@ -49,9 +67,9 @@ function ManagerView() {
           {requests.map((request) => (
             <div
               key={request._id}
-              className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink/10 bg-white/70 p-4"
+              className="flex flex-col gap-4 rounded-2xl border border-ink/10 bg-white/70 p-4 sm:flex-row sm:items-center sm:justify-between"
             >
-              <div>
+              <div className="min-w-[220px] flex-1">
                 <p className="text-sm font-semibold">
                   {request.userId ? request.userId.name : "Employee"}
                 </p>
@@ -60,8 +78,15 @@ function ManagerView() {
                   {new Date(request.startDate).toLocaleDateString()} -{" "}
                   {new Date(request.endDate).toLocaleDateString()}
                 </p>
+                <textarea
+                  rows="2"
+                  className="mt-3 w-full rounded-2xl border border-ink/10 bg-white/80 p-3 text-xs"
+                  placeholder="Add a remark for rejection"
+                  value={remarks[request._id] || ""}
+                  onChange={handleRemarkChange(request._id)}
+                />
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
                 <Badge>Pending</Badge>
                 <Button size="sm" onClick={() => handleAction(request._id, "approve")}>
                   Approve

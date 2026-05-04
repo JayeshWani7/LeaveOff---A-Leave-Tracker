@@ -7,6 +7,13 @@ const { User, LeaveType, LeaveRequest, AuditLog, Attendance } = require("../mode
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
+const LEAVE_TYPES = [
+  { name: "Sick", yearlyQuota: 10 },
+  { name: "Casual", yearlyQuota: 12 },
+  { name: "WFH", yearlyQuota: 20 },
+  { name: "Comp-off", yearlyQuota: 5 },
+];
+
 async function seedUsers() {
   const passwordHash1 = await bcrypt.hash("908767", 10);
   const passwordHash2 = await bcrypt.hash("908765", 10);
@@ -67,6 +74,7 @@ async function seed() {
   ]);
 
   const users = await seedUsers();
+  await LeaveType.insertMany(LEAVE_TYPES);
 
   await mongoose.disconnect();
 

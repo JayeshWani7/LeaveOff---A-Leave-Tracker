@@ -33,7 +33,7 @@ function Sidebar({ open, onClose }) {
       />
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-full w-72 border-r border-white/60 bg-white/80 px-6 pb-10 pt-8 shadow-soft backdrop-blur-lg transition-transform",
+          "fixed left-0 top-0 z-40 h-full w-72 max-w-full overflow-y-auto border-r border-white/60 bg-white/80 px-6 pb-10 pt-8 shadow-soft backdrop-blur-lg transition-transform sm:w-80",
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >

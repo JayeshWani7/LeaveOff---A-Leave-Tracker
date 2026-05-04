@@ -17,7 +17,7 @@ function Dashboard() {
           <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-brand/10 blur-3xl" />
           <CardHeader>
             <Badge>Today</Badge>
-            <CardTitle className="mt-4 text-3xl">
+            <CardTitle className="mt-4 text-2xl sm:text-3xl">
               You have 12.5 days of leave remaining.
             </CardTitle>
             <CardDescription>
