@@ -62,10 +62,14 @@ async function getTodayAttendance(req, res) {
     const attendance = await Attendance.findOne({ userId, date: today }).lean();
     const status = await getDailyStatus(userId, today);
 
+    // Return a flat shape so the frontend can read checkIn, checkOut, status directly
     return res.status(200).json({
       date: today,
       status,
-      attendance,
+      checkIn: attendance ? attendance.checkInTime : null,
+      checkOut: attendance ? attendance.checkOutTime : null,
+      totalHours: attendance ? attendance.totalHours : null,
+      notes: attendance ? attendance.notes : null,
     });
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -92,9 +96,43 @@ async function getUserAttendance(req, res) {
   }
 }
 
+/**
+ * GET /api/attendance/history
+ * Returns the last 30 attendance records for the authenticated user.
+ */
+async function getMyAttendanceHistory(req, res) {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized." });
+    }
+
+    const records = await Attendance.find({ userId })
+      .sort({ date: -1 })
+      .limit(30)
+      .lean();
+
+    // Normalise field names to match what the frontend expects
+    const shaped = records.map((r) => ({
+      _id: r._id,
+      date: r.date,
+      status: r.status,
+      checkIn: r.checkInTime,
+      checkOut: r.checkOutTime,
+      totalHours: r.totalHours,
+      notes: r.notes,
+    }));
+
+    return res.status(200).json(shaped);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+}
+
 module.exports = {
   handleCheckIn,
   handleCheckOut,
   getTodayAttendance,
   getUserAttendance,
+  getMyAttendanceHistory,
 };

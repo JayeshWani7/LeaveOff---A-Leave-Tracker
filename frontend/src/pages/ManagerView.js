@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { EmptyState } from "../components/ui/empty-state";
+import { ErrorBanner } from "../components/ui/error-banner";
 import { Spinner } from "../components/ui/spinner";
 import { StatusBadge } from "../components/ui/status-badge";
 import { useApi } from "../lib/api";
@@ -73,10 +74,14 @@ function ManagerView() {
           <CardTitle>Manager queue</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {status.error ? <p className="text-sm text-red-600">{status.error}</p> : null}
+          <ErrorBanner
+            message={status.error}
+            onDismiss={() => setStatus((s) => ({ ...s, error: "" }))}
+          />
           {status.loading ? <Spinner label="Loading requests" /> : null}
           {!status.loading && requests.length === 0 ? (
             <EmptyState
+              icon="✅"
               title="No pending requests"
               description="You're all caught up. New submissions will appear here."
             />

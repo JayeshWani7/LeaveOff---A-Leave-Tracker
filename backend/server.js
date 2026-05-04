@@ -7,6 +7,7 @@ const attendanceRoutes = require("./routes/attendance");
 const leaveTypeRoutes = require("./routes/leaveTypes");
 const userRoutes = require("./routes/users");
 const authRoutes = require("./routes/auth");
+const dashboardRoutes = require("./routes/dashboard");
 const { requireAuth } = require("./middleware/auth");
 
 const app = express();
@@ -39,9 +40,16 @@ app.use("/api", requireAuth, leaveRequestRoutes);
 app.use("/api", requireAuth, attendanceRoutes);
 app.use("/api", requireAuth, leaveTypeRoutes);
 app.use("/api", requireAuth, userRoutes);
+app.use("/api/dashboard", requireAuth, dashboardRoutes);
 
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 10000,
+    // Explicitly enable TLS and use the system CA store.
+    // This resolves "tlsv1 alert internal error" on Node 18+ with Atlas.
+    tls: true,
+    tlsAllowInvalidCertificates: false,
+  })
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
@@ -51,3 +59,4 @@ mongoose
     console.error("Failed to connect to MongoDB:", error);
     process.exit(1);
   });
+

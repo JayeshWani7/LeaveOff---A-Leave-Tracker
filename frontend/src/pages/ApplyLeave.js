@@ -10,8 +10,10 @@ import {
 } from "../components/ui/card";
 import { useApi } from "../lib/api";
 import { EmptyState } from "../components/ui/empty-state";
+import { ErrorBanner } from "../components/ui/error-banner";
 import { Spinner } from "../components/ui/spinner";
 import { StatusBadge } from "../components/ui/status-badge";
+import { SuccessBanner } from "../components/ui/success-banner";
 
 function ApplyLeave() {
   const api = useApi();
@@ -131,11 +133,9 @@ function ApplyLeave() {
         </CardHeader>
         <CardContent>
           {loadStatus.loading ? (
-            <Spinner label="Loading leave details" className="py-6" />
+            <Spinner label="Loading leave details…" className="py-6" size="md" />
           ) : null}
-          {loadStatus.error ? (
-            <p className="text-sm text-red-600">{loadStatus.error}</p>
-          ) : null}
+          <ErrorBanner message={loadStatus.error} />
           {!loadStatus.loading ? (
             <form className="grid gap-5 md:grid-cols-2" onSubmit={handleSubmit}>
               <label className="flex flex-col gap-2 text-sm font-semibold">
@@ -208,14 +208,26 @@ function ApplyLeave() {
                 />
               </label>
               {status.error ? (
-                <p className="md:col-span-2 text-sm text-red-600">{status.error}</p>
+                <ErrorBanner
+                  message={status.error}
+                  className="md:col-span-2"
+                  onDismiss={() => setStatus((s) => ({ ...s, error: "" }))}
+                />
               ) : null}
               {status.success ? (
-                <p className="md:col-span-2 text-sm text-emerald-700">{status.success}</p>
+                <SuccessBanner
+                  message={status.success}
+                  className="md:col-span-2"
+                  onDismiss={() => setStatus((s) => ({ ...s, success: "" }))}
+                />
               ) : null}
               <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Button type="submit" disabled={status.loading} className="w-full sm:w-auto">
-                  {status.loading ? "Submitting..." : "Submit request"}
+                  {status.loading ? (
+                    <><Spinner size="xs" className="text-white" /> Submitting…</>
+                  ) : (
+                    "Submit request"
+                  )}
                 </Button>
                 <Button type="button" variant="outline" className="w-full sm:w-auto">
                   Save as draft

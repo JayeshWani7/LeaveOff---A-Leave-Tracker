@@ -16,3 +16,7 @@
 - Add API base URL configuration to fix frontend requests hitting localhost:3000.
 - Fix approval flow crash when request body is missing by guarding managerComment access.
 - Add frontend UX improvements: spinners, friendly errors, empty states, and status badges.
+- Add global UX improvements: reusable ErrorBanner and SuccessBanner components with dismiss and slide-up animation; upgraded StatusBadge with dot indicator and red variant for Rejected; enhanced Spinner with overlay mode and ARIA roles; enhanced EmptyState with icon slot and fade-in animation; upgraded Badge with red/rose/sky/violet variants; wired Dashboard, Attendance, and Calendar pages to live APIs with loading/error/empty states; Login and ApplyLeave submit buttons now show inline spinners; added slideUp and pulseSoft Tailwind animations; Card base class updated with relative positioning for overlay support.
+- Fix 404 API errors: added backend alias routes for /attendance/checkin, /attendance/checkout, /attendance/history (with field-normalised response), and /leave-requests/team-calendar; created /api/dashboard/summary endpoint (dashboardController + dashboard route) returning leaveBalance, pendingCount, onLeaveToday, halfDayCount, attendanceRate; fixed Calendar frontend field mapping to read backend's userName/leaveType string fields.
+
+

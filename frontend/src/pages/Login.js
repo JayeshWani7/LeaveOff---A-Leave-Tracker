@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { ErrorBanner } from "../components/ui/error-banner";
+import { Spinner } from "../components/ui/spinner";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
@@ -65,9 +67,13 @@ function Login() {
                 required
               />
             </label>
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            <ErrorBanner message={error} onDismiss={() => setError("")} />
             <Button className="w-full" type="submit" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? (
+                <><Spinner size="xs" className="text-white" /> Signing in…</>
+              ) : (
+                "Sign in"
+              )}
             </Button>
           </form>
         </CardContent>

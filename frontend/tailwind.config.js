@@ -28,10 +28,20 @@ module.exports = {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
+        slideUp: {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        pulseSoft: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
       },
       animation: {
         floatIn: "floatIn 0.6s ease-out",
         fadeIn: "fadeIn 0.4s ease-out",
+        slideUp: "slideUp 0.3s ease-out",
+        pulseSoft: "pulseSoft 1.8s ease-in-out infinite",
       },
     },
   },
