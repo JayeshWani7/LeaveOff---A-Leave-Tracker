@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 
 import { Button } from "./ui/button";
+import { useAuth } from "../context/AuthContext";
 
 const titles = {
   "/dashboard": "Overview",
@@ -13,6 +14,8 @@ const titles = {
 function Topbar({ onMenuClick }) {
   const location = useLocation();
   const title = titles[location.pathname] || "LeaveOff";
+  const { user } = useAuth();
+  const isManager = user && (user.role === "manager" || user.role === "superadmin");
 
   return (
     <header className="sticky top-0 z-20 bg-transparent">
@@ -34,7 +37,7 @@ function Topbar({ onMenuClick }) {
           </div>
         </div>
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="outline">Review Requests</Button>
+          {isManager ? <Button variant="outline">Review Requests</Button> : null}
           <Button>Apply Leave</Button>
         </div>
       </div>

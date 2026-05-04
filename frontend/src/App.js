@@ -7,31 +7,55 @@ import ApplyLeave from "./pages/ApplyLeave";
 import ManagerView from "./pages/ManagerView";
 import Calendar from "./pages/Calendar";
 import Attendance from "./pages/Attendance";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-sand">
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <div className="lg:pl-72">
-          <Topbar onMenuClick={() => setSidebarOpen(true)} />
-          <main className="px-6 pb-16 pt-6 sm:px-8">
-            <div className="mx-auto max-w-6xl animate-floatIn">
-              <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/apply-leave" element={<ApplyLeave />} />
-                <Route path="/manager" element={<ManagerView />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/attendance" element={<Attendance />} />
-              </Routes>
-            </div>
-          </main>
+    <AuthProvider>
+      <BrowserRouter>
+        <div className="min-h-screen bg-sand">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <div className="min-h-screen bg-sand">
+                    <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+                    <div className="lg:pl-72">
+                      <Topbar onMenuClick={() => setSidebarOpen(true)} />
+                      <main className="px-6 pb-16 pt-6 sm:px-8">
+                        <div className="mx-auto max-w-6xl animate-floatIn">
+                          <Routes>
+                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/apply-leave" element={<ApplyLeave />} />
+                            <Route
+                              path="/manager"
+                              element={
+                                <ProtectedRoute roles={["manager", "superadmin"]}>
+                                  <ManagerView />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route path="/calendar" element={<Calendar />} />
+                            <Route path="/attendance" element={<Attendance />} />
+                          </Routes>
+                        </div>
+                      </main>
+                    </div>
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
         </div>
-      </div>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

@@ -2,16 +2,25 @@ import { NavLink } from "react-router-dom";
 
 import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard" },
   { label: "Apply Leave", to: "/apply-leave" },
-  { label: "Manager View", to: "/manager" },
+  { label: "Manager View", to: "/manager", roles: ["manager", "superadmin"] },
   { label: "Calendar", to: "/calendar" },
   { label: "Attendance", to: "/attendance" },
 ];
 
 function Sidebar({ open, onClose }) {
+  const { user, logout } = useAuth();
+  const visibleItems = navItems.filter((item) => {
+    if (!item.roles) {
+      return true;
+    }
+    return user && item.roles.includes(user.role);
+  });
+
   return (
     <>
       <div
@@ -46,7 +55,7 @@ function Sidebar({ open, onClose }) {
         </div>
 
         <div className="mt-8 flex flex-col gap-2">
-          {navItems.map((item) => (
+          {visibleItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -72,6 +81,15 @@ function Sidebar({ open, onClose }) {
           </p>
           <Button className="mt-4 w-full" size="sm">
             New Leave Request
+          </Button>
+          <Button
+            className="mt-3 w-full"
+            size="sm"
+            variant="outline"
+            type="button"
+            onClick={logout}
+          >
+            Sign out
           </Button>
         </div>
       </aside>

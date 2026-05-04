@@ -5,14 +5,18 @@ const { issueToken } = require("../middleware/auth");
 
 async function login(req, res) {
   try {
-    const { username, password } = req.body || {};
+    const { username, password, role } = req.body || {};
 
-    if (!username || !password) {
-      return res.status(400).json({ message: "username and password are required." });
+    if (!username || !password || !role) {
+      return res.status(400).json({ message: "username, password, and role are required." });
     }
 
     const user = await User.findOne({ username }).lean();
     if (!user) {
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
+
+    if (user.role !== role) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 

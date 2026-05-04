@@ -8,3 +8,5 @@
 - Create Express APIs for the attendance system (check-in, check-out, today, user history).
 - Create a backend server.js with Express and route wiring if missing.
 - Add RBAC with authentication: username/password login for employee, manager, and superadmin.
+- Add login page in frontend with role-based UI visibility and seed specific users after clearing data.
+- Fix seed script top-level await error after custom user seeding.
