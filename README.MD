@@ -58,6 +58,22 @@ A full-stack internal HR tool built for managing **leave requests, attendance, a
 
 ---
 
+
+---
+
+## 👤 Demo User Credentials
+
+Use the following credentials to log in as different user types (seeded by default):
+
+| Role        | Username  | Email                   | Password |
+|-------------|-----------|-------------------------|----------|
+| Employee 1  | jayesh1   | jayesh1@leaveoff.dev    | 908767   |
+| Employee 2  | jayesh2   | jayesh2@leaveoff.dev    | 908765   |
+| Manager     | jayesh3   | jayesh3@leaveoff.dev    | 9765675  |
+| Superadmin  | jayesh4   | jayesh4@leaveoff.dev    | 975272   |
+
+---
+
 ## 🛠️ Tech Stack
 
 **Frontend:**
