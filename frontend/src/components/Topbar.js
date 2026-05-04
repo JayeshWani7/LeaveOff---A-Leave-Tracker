@@ -19,21 +19,21 @@ function Topbar({ onMenuClick }) {
 
   return (
     <header className="sticky top-0 z-20 bg-transparent">
-      <div className="flex items-center justify-between px-5 pb-4 pt-6 sm:px-8">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-6 pb-5 pt-8 sm:px-10">
+        <div className="flex items-center gap-4">
           <button
             type="button"
-            className="rounded-full border border-white/60 bg-white/70 p-2 text-ink/80 shadow-soft transition hover:bg-white lg:hidden"
+            className="rounded-full border border-white/60 bg-white/70 p-2.5 text-ink/80 shadow-soft transition hover:bg-white lg:hidden"
             onClick={onMenuClick}
             aria-label="Open navigation"
           >
             ☰
           </button>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-ink/50">
+          <div className="space-y-0.5">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-ink/40">
               Week 19
             </p>
-            <h2 className="text-2xl font-semibold sm:text-3xl">{title}</h2>
+            <h2 className="text-2xl font-semibold leading-tight sm:text-3xl">{title}</h2>
           </div>
         </div>
         <div className="hidden items-center gap-3 md:flex">
@@ -47,7 +47,8 @@ function Topbar({ onMenuClick }) {
           </Button>
         </div>
       </div>
-      <div className="px-5 pb-4 sm:px-8 md:hidden">
+
+      <div className="px-6 pb-5 sm:px-10 md:hidden">
         <div className="flex flex-col gap-2">
           {isManager ? (
             <Button variant="outline" asChild>
@@ -64,3 +65,4 @@ function Topbar({ onMenuClick }) {
 }
 
 export default Topbar;
+
