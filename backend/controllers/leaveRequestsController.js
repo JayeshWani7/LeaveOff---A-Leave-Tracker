@@ -203,6 +203,30 @@ function rejectLeaveRequest(req, res) {
   return updateLeaveRequestStatus(req, res, "Rejected", "REJECTED");
 }
 
+async function getPendingLeaveRequests(req, res) {
+  try {
+    const user = req.user;
+    if (!user || (user.role !== "manager" && user.role !== "superadmin")) {
+      return res.status(403).json({ message: "Only managers can view pending requests." });
+    }
+
+    const query = { status: "Pending" };
+    if (user.role === "manager") {
+      query.appliedTo = user.id;
+    }
+
+    const requests = await LeaveRequest.find(query)
+      .populate("userId", "name")
+      .populate("leaveType", "name")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json(requests);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+}
+
 async function getTeamLeaveCalendar(req, res) {
   try {
     const { leaveType } = req.query;
@@ -243,4 +267,5 @@ module.exports = {
   approveLeaveRequest,
   rejectLeaveRequest,
   getTeamLeaveCalendar,
+  getPendingLeaveRequests,
 };

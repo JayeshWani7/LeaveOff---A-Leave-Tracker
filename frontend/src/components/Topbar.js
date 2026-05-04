@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 import { Button } from "./ui/button";
 import { useAuth } from "../context/AuthContext";
@@ -37,8 +37,14 @@ function Topbar({ onMenuClick }) {
           </div>
         </div>
         <div className="hidden items-center gap-3 md:flex">
-          {isManager ? <Button variant="outline">Review Requests</Button> : null}
-          <Button>Apply Leave</Button>
+          {isManager ? (
+            <Button variant="outline" asChild>
+              <Link to="/manager">Review Requests</Link>
+            </Button>
+          ) : null}
+          <Button asChild>
+            <Link to="/apply-leave">Apply Leave</Link>
+          </Button>
         </div>
       </div>
     </header>

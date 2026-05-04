@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 
 import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
@@ -80,7 +80,7 @@ function Sidebar({ open, onClose }) {
             Keep your balances updated. Quick actions help teams plan faster.
           </p>
           <Button className="mt-4 w-full" size="sm">
-            New Leave Request
+            <Link to="/apply-leave">New Leave Request</Link>
           </Button>
           <Button
             className="mt-3 w-full"

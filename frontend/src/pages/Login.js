@@ -8,7 +8,6 @@ import { useAuth } from "../context/AuthContext";
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("employee");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -23,7 +22,7 @@ function Login() {
     setLoading(true);
 
     try {
-      await login(username.trim().toLowerCase(), password, role);
+      await login(username.trim().toLowerCase(), password);
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.message || "Login failed.");
@@ -43,19 +42,6 @@ function Login() {
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <label className="flex flex-col gap-2 text-sm font-semibold">
-              Role
-              <select
-                value={role}
-                onChange={(event) => setRole(event.target.value)}
-                className="h-11 rounded-2xl border border-ink/10 bg-white/80 px-4 text-sm"
-                required
-              >
-                <option value="employee">Employee</option>
-                <option value="manager">Manager</option>
-                <option value="superadmin">Super Admin</option>
-              </select>
-            </label>
             <label className="flex flex-col gap-2 text-sm font-semibold">
               Username
               <input

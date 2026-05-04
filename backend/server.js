@@ -4,6 +4,8 @@ require("dotenv").config();
 
 const leaveRequestRoutes = require("./routes/leaveRequests");
 const attendanceRoutes = require("./routes/attendance");
+const leaveTypeRoutes = require("./routes/leaveTypes");
+const userRoutes = require("./routes/users");
 const authRoutes = require("./routes/auth");
 const { requireAuth } = require("./middleware/auth");
 
@@ -25,6 +27,8 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api", requireAuth, leaveRequestRoutes);
 app.use("/api", requireAuth, attendanceRoutes);
+app.use("/api", requireAuth, leaveTypeRoutes);
+app.use("/api", requireAuth, userRoutes);
 
 mongoose
   .connect(MONGODB_URI)

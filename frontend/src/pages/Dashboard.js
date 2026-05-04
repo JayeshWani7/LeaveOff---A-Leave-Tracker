@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import {
@@ -25,8 +26,12 @@ function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Button>Apply for Leave</Button>
-            <Button variant="outline">View History</Button>
+            <Button asChild>
+              <Link to="/apply-leave">Apply for Leave</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/calendar">View History</Link>
+            </Button>
           </CardContent>
         </Card>
 

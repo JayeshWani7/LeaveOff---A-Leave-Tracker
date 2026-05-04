@@ -5,11 +5,13 @@ const {
 	approveLeaveRequest,
 	rejectLeaveRequest,
 	getTeamLeaveCalendar,
+	getPendingLeaveRequests,
 } = require("../controllers/leaveRequestsController");
 
 const router = express.Router();
 
 router.post("/leave-requests", createLeaveRequest);
+router.get("/leave-requests/pending", getPendingLeaveRequests);
 router.get("/leave-requests/calendar", getTeamLeaveCalendar);
 router.patch("/leave-requests/:id/approve", approveLeaveRequest);
 router.patch("/leave-requests/:id/reject", rejectLeaveRequest);

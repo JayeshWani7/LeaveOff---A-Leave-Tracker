@@ -19,11 +19,11 @@ function getStoredAuth() {
 export function AuthProvider({ children }) {
   const [authState, setAuthState] = useState(() => getStoredAuth());
 
-  const login = useCallback(async (username, password, role) => {
+  const login = useCallback(async (username, password) => {
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, role }),
+      body: JSON.stringify({ username, password }),
     });
 
     if (!response.ok) {

@@ -10,3 +10,4 @@
 - Add RBAC with authentication: username/password login for employee, manager, and superadmin.
 - Add login page in frontend with role-based UI visibility and seed specific users after clearing data.
 - Fix seed script top-level await error after custom user seeding.
+- Wire frontend to backend, relax login role requirement, and connect Apply Leave/Manager actions to APIs.
