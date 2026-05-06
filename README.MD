@@ -150,6 +150,7 @@ npm install
 
 ```
 PORT=5000
+# NOTE: This exposed MongoDB URI is not safe; published only for testing purposes.
 MONGODB_URI="mongodb+srv://wanijayesh0_db_user:xtKz6g1m3eXBDjVv@cluster0.ozeitq7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true"
 JWT_SECRET=your-strong-secret
 
